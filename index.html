@@ -710,24 +710,19 @@
     </div>
 
     <script>
-
       function extractViewBoxWidth(svg) {
         return parseInt(svg.getAttribute("viewBox").split(" ")[2]);
       }
 
- /*     let cursorOrigin = 36;
+      let cursorOrigin = 36;
       let cursorWidth = 68;
       let cursorOffset = cursorOrigin + cursorWidth / 2;
-      let maxPosition = 1417;
-      let smallUnit = maxPosition / 50;
+      /*
+     
 
-      let containerWidth = document
-        .getElementById("trackbar")
-        .getBoundingClientRect().width;
+      
 
-      let viewport = document.getElementById("trackbar");
-      let largeurViewport = extractViewBoxWidth(viewport);  
-      let Écran_À_viewport = containerWidth / largeurViewport;
+
       let CoordonnéesViewportX = Coordonnées_Écran_X / Écran_À_viewport;
       let CoordonéesViewport_X = Math.round(
         CoordonéesViewport_X / (smallUnit / 2)
@@ -742,38 +737,69 @@
       cursor.style.fill = "rgb(" + (levelValue / 10) * 255 + ",0 ,0)";
       cursor.style.stroke = "rgb(" + (255 - (levelValue / 10) * 255) + ",0 ,0)";*/
 
-
       let trackbar = document.getElementById("trackbar");
-      let offset = {x:0,y:0};
+      let offset = { x: 0, y: 0 };
       let mouseIsDown = false;
-      let mousDownPos = {x:0, y:0};
-      let target = null;
+      let mousDownPos = { x: 0, y: 0 };
+      let maxPosition = 1417;
+      let smallUnit = maxPosition / 50;
+      let containerWidth = document
+        .getElementById("trackbar")
+        .getBoundingClientRect().width;
+      let viewport = document.getElementById("trackbar");
+      let largeurViewport = extractViewBoxWidth(viewport);
+      let Écran_À_viewport = containerWidth / largeurViewport;
+      let viewportPositionX = 0
 
+      console.log(Écran_À_viewport);
 
       trackbar.addEventListener("pointerdown", function (e) {
-            target = e.target;
-            target.setPointerCapture(e.pointerId);
-            mousDownPos = {x: e.offsetX, y: e.offsetY};
-            
-            offset = extractTranslateValues(target.style.transform);
-            console.log(offset.x + " " + offset.y);
-            mouseIsDown = true;
+        target = e.target;
+        target.setPointerCapture(e.pointerId);
+        mousDownPos = { x: e.offsetX, y: e.offsetY };
+
+        offset = extractTranslateValues(target.style.transform);
+       // console.log(offset.x + " " + offset.y);
+        mouseIsDown = true;
       });
 
-      function extractTranslateValues(translateProp){
-        if(translateProp == "") return{x:0,y:0};
-        let cleaned = translateProp.replace("translate(","").replace(")","").replaceAll("px","").replaceAll(" ","").split(",");
-        return{x: parseInt(cleaned[0]), y:parseInt(cleaned[1])};
+      function extractTranslateValues(translateProp) {
+        if (translateProp == "") return { x: 0, y: 0 };
+        let cleaned = translateProp
+          .replace("translate(", "")
+          .replace(")", "")
+          .replaceAll("px", "")
+          .replaceAll(" ", "")
+          .split(",");
+        return { x: parseInt(cleaned[0]), y: parseInt(cleaned[1]) };
       }
 
       trackbar.addEventListener("pointermove", function (e) {
-        if (mouseIsDown) {
-            let mousePos = {x: e.offsetX, y: e.offsetY};
-            let deltaX = offset.x+mousePos.x - mousDownPos.x;
-            let deltaY = target.offsetY;
-            target.style.transform = "translate(" + deltaX+"px, 0px)";
+        let target = e.target || event.srcElement;
+        let id = target.id;
+        let deltaX = 0;
 
-
+        if (id === "cursor") {
+          if (mouseIsDown) {
+            //console.log(id);
+            let mousePos = { x: e.offsetX, y: e.offsetY };
+           // console.log(e.offsetX);
+            let cursorPosition = extractTranslateValues(
+              e.target.style.transform
+            );
+           // console.log(cursorPosition);
+            deltaX = mousePos.x - mousDownPos.x;
+            console.log("offset.x:" + offset.x);
+             viewportPositionX = offset.x + deltaX / Écran_À_viewport;
+            viewportPositionX = Math.round(viewportPositionX / (smallUnit/2) * (smallUnit/2));
+            if (viewportPositionX >= 0 && viewportPositionX <= 1417) {
+              
+              console.log(viewportPositionX);
+             
+              target.style.transform = "translate(" + viewportPositionX + "px, 0px)";
+              
+            }
+          }
         }
       });
 
@@ -786,7 +812,6 @@
       level = document.getElementById("level");
       level.addEventListener("change", function (e) {
         if (!mouseIsDown) {
-
         }
       });
     </script>
